@@ -61,7 +61,7 @@ Fixtures live in `scripts/seed-data.js`. IDs are fixed, so rerunning the seed cr
 
 ## Separate Express backend
 
-`backend/` is an independent Node.js app with its own dependencies and startup commands. It does not need the UI, Java, or the Firestore emulator. The task UI continues to use its TanStack Start server functions; Express runs separately.
+`backend/` is an independent Node.js app with its own dependencies and startup commands. Its Firebase Admin connection targets the same `demo-interview-exercise` project and `(default)` database at `127.0.0.1:8080` as TanStack Start. Start the emulator from the repository root with `npm run emulator` (or use the emulator already started by `npm run dev`). The task UI continues to use its TanStack Start server functions; Express runs separately.
 
 From the repository root, open a separate terminal and run:
 
@@ -77,7 +77,22 @@ The server runs at **http://127.0.0.1:3001** and restarts when its source change
 curl http://127.0.0.1:3001/health
 ```
 
-`GET /health` returns HTTP **200** with `{"status":"ok"}`. This checks that the Express app is running; it does not check a database connection.
+`GET /health` performs a real Firestore read and returns HTTP **200** with:
+
+```json
+{
+  "status": "ok",
+  "firestore": {
+    "status": "connected",
+    "projectId": "demo-interview-exercise",
+    "databaseId": "(default)",
+    "host": "127.0.0.1:8080",
+    "samplePartnerExists": true
+  }
+}
+```
+
+`samplePartnerExists` confirms whether the seeded `msps/msp-demo` document exists. An empty database is still healthy and returns `false`. Failed reads or a five-second timeout return HTTP **503** with `firestore.status: "unavailable"` and log the failure in the Express terminal. No Firebase credentials are needed.
 
 Use `npm start` inside `backend/` to run without file watching. Set `PORT` to change the port, for example `PORT=3002 npm start`. Stop it with **Ctrl+C**. The root `npm run dev` command does not start Express.
 
@@ -97,6 +112,7 @@ The data flow is **React → TanStack Query → TanStack Start server functions 
 | `scripts/seed.js`, `scripts/seed-data.js` | Seed command and sample partners/reported emails |
 | `backend/src/app.js` | Standalone Express app and health check route |
 | `backend/src/server.js` | Express HTTP server and port configuration |
+| `backend/src/firestore.js` | Firebase Admin connection and live database health check |
 
 `src/routeTree.gen.js` is generated automatically; do not edit it by hand.
 
