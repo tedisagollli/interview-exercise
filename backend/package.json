@@ -1,0 +1,17 @@
+{
+  "name": "interview-exercise-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone Express backend for the interview exercise",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
